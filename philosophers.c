@@ -6,7 +6,7 @@
 /*   By: lespinoz <lespinoz@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/05 16:25:08 by lespinoz          #+#    #+#             */
-/*   Updated: 2022/04/05 16:25:10 by lespinoz         ###   ########.fr       */
+/*   Updated: 2022/04/06 16:32:42 by lespinoz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,16 @@ int	init_philosophers(t_game_rules *rules)
 	return (0);
 }
 
-int init_args(t_game_rules *rules, char **arguments)
+int	init_args2(t_game_rules *rules)
+{
+	if (init_mutex(rules) == 1)
+		return (1);
+	if (init_philosophers(rules) == 1)
+		return (1);
+	return (0);
+}
+
+int	init_args(t_game_rules *rules, char **arguments)
 {
 	rules->num_philos = ft_atoi(arguments[1]);
 	rules->time_death = ft_atoi(arguments[2]);
@@ -59,16 +68,18 @@ int init_args(t_game_rules *rules, char **arguments)
 		printf("0 1 died \n");
 		exit(0);
 	}
-	if (arguments[5] != NULL || arguments[5] > 0)
+	if (arguments[5])
+	{
 		rules->num_limit_eat = ft_atoi(arguments[5]);
+		if (rules->num_limit_eat <= 0)
+			return (1);
+	}
 	else
-		rules->num_limit_eat = 0;
+		rules->num_limit_eat = -1;
 	if (rules->num_philos < 1 || rules->time_death <= 0 || rules->time_eat <= 0
-		|| rules->time_sleep <= 0 || rules->num_philos > 250 || rules->num_limit_eat < 0)
+		|| rules->time_sleep <= 0 || rules->num_philos > 250)
 		return (1);
-	if (init_mutex(rules) == 1)
-		return (1);
-	if (init_philosophers(rules) == 1)
+	if (init_args2(rules) == 1)
 		return (1);
 	return (0);
 }

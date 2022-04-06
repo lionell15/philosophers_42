@@ -6,7 +6,7 @@
 /*   By: lespinoz <lespinoz@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/05 16:25:28 by lespinoz          #+#    #+#             */
-/*   Updated: 2022/04/05 16:25:30 by lespinoz         ###   ########.fr       */
+/*   Updated: 2022/04/06 16:42:13 by lespinoz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,8 @@
 
 void	exit_launcher(t_game_rules *rules, t_philo *philos)
 {
-	int i;
-	int j;
+	int	i;
+	int	j;
 
 	i = -1;
 	j = -1;
@@ -26,37 +26,38 @@ void	exit_launcher(t_game_rules *rules, t_philo *philos)
 	pthread_mutex_destroy(&(rules->write_status));
 }
 
-void	check_death(t_game_rules *rules, t_philo *p)
+void	check_death(t_game_rules *r, t_philo *p)
 {
-	int i;
+	int	i;
 
-	while (!(rules->all_philos_ate))
+	while (!(r->all_philos_ate))
 	{
 		i = -1;
-		while (++i < rules->num_philos && !(rules->died))
+		while (++i < r->num_philos && !(r->died))
 		{
-			pthread_mutex_lock(&(rules->check_eat));
-			if (time_result(p[i].last_time_eat, timestamp()) > rules->time_death)
+			pthread_mutex_lock(&(r->check_eat));
+			if (time_result(p[i].last_time_eat, timestamp()) > r->time_death)
 			{
-				print_status(rules, i, "died");
-				rules->died = 1;
+				print_status(r, i, "died");
+				r->died = 1;
 			}
-			pthread_mutex_unlock(&(rules->check_eat));
+			pthread_mutex_unlock(&(r->check_eat));
 			usleep(100);
 		}
-		if (rules->died)
+		if (r->died)
 			break ;
 		i = 0;
-		while (rules->num_limit_eat != 0 && i < rules->num_philos && p[i].num_eat_philo >= rules->num_limit_eat)
+		while ((r->num_limit_eat != -1) && (i < r->num_philos)
+			&& (p[i].num_eat_philo >= (r->num_limit_eat - 1)))
 			i++;
-		if (i == rules->num_philos)
-			rules->all_philos_ate = 1;
+		if (i == r->num_philos)
+			r->all_philos_ate = 1;
 	}
 }
 
 void	philo_eats(t_philo *philo)
 {
-	t_game_rules *rules;
+	t_game_rules	*rules;
 
 	rules = philo->rules;
 	pthread_mutex_lock(&(rules->forks[philo->fork_left]));
@@ -99,8 +100,8 @@ void	*p_thread(void *philo_param)
 
 int	start_dinner(t_game_rules *rules)
 {
-	int				i;
-	t_philo	*philo;
+	int			i;
+	t_philo		*philo;
 
 	i = -1;
 	philo = rules->philosophers;
